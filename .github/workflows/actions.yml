@@ -39,7 +39,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key-id: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: $env.AWS_REGION
+          aws-region: ${{ vars.AWS_REGION }}
       - name: Show Secret with AWS CLI
         run: |
           aws secretsmanager get-secret-value --secret-id ds-secret
