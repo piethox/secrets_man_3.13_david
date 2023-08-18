@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: unit-testing
     steps:
-      - name: Use AWS Credentials
+      - name: Use AWS Credentials and region
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
