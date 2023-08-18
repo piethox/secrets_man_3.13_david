@@ -1,0 +1,65 @@
+name: Module_3.13_SecretManagement
+run-name: ${{ github.actor }} is deploying serverles with getting Secrets
+on: [push]
+
+jobs:
+  predeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The job is automatically triggered by a ${{ github.event_name }} event."
+
+  install-dependencies:
+    runs-on: ubuntu-latest
+    needs: predeploy
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+      - name: Run clean installation of npm dependencies
+        run: npm ci
+
+  unit-testing:
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+      - name: Run clean installation of npm dependencies
+        run: npm ci
+      - name: Run unit testing command
+        run: npm test
+
+  get-secrets:
+    runs-on: ubuntu-latest
+    needs: unit-testing
+    steps:
+      - name: Use AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key-id: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ variables.AWS_REGION }}
+      - name: Show Secret with AWS CLI
+        run: |
+          aws secretsmanager get-secret-value --secret-id ds-secret
+      - name: Show SystemsManager Parameter with AWS CLI
+        run: |
+          aws ssm get-parameter --name ds-parameter
+
+  deploy-serverless:
+    runs-on: ubuntu-latest
+    needs: get-secrets
+    steps:
+      - uses: actions/checkout@v3
+      - name: use node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Run NPM clean install
+        run: npm ci
+      - name: Serverless Deployment
+        uses: serverless/github-action@master
+        with:
+          args: deploy
+        env:
+          AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
