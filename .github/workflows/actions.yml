@@ -24,7 +24,9 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
       - name: Run installation of npm dependencies
-        run: npm install
+        run: npm ci
+      - name: Run NPM Jest installation
+        run: npm install jest
       - name: Run unit testing command
         run: npm test
 
